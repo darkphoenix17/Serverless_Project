@@ -142,7 +142,12 @@ To implement authentication in your application, you would have to create an Aut
 
 # Best practices
 
-To complete this exercise, please follow the best practices from the 6th lesson of this course.
+- Logging of API is enabled
+- Documentation is also enabled
+- Tracing of lambda function and API Gateway through Amazon XRay
+- CORS policy enabled
+- Using Json schema for validation
+- Authentication using third party service i.e. Auth0(https://manage.auth0.com/dashboard) here
 
 ## Logging
 
@@ -224,16 +229,26 @@ await this.dynamoDBClient
 ## Backend
 
 To deploy an application run the following commands:
-
+configure youe sls 
 ```
+sls config --provider aws --key <Iam Key> --secret <Iam Secret> --profile 'serverless'
 cd backend
 npm install
-sls deploy -v
+export NODE_OPTIONS=--max_old_space_size=8192
+sls deploy -v  --aws-profile serverless
 ```
 
 ## Frontend
 
-To run a client application first edit the `client/src/config.ts` file to set correct parameters. And then run the following commands:
+To run a client application first edit the `client/src/config.ts` file to set correct parameters.
+Parameters like 
+- apiId
+- apiEndpoint
+- authConfig
+  - domain
+  - clientId
+  - callbackUrl
+ And then run the following commands:
 
 ```
 cd client
@@ -245,6 +260,7 @@ This should start a development server with the React application that will inte
 
 # Postman collection
 
+`Note`: I have made my default region as `ap-south-1` in serverless.yml
 An alternative way to test your API, you can use the Postman collection that contains sample requests. You can find a Postman collection in this project. To import this collection, do the following.
 
 Click on the import button:
@@ -269,3 +285,7 @@ Right click on the imported collection to set variables for the collection:
 Provide variables for the collection (similarly to how this was done in the course):
 
 ![Alt text](images/import-collection-5.png?raw=true "Image 5")
+
+## Points to be noted:
+- LocalSecondaryIndexes (LSI) has been made for linking two datatypes
+- RS256algorith is used for Authorization

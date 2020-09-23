@@ -162,8 +162,7 @@ functions:
 #         authorizer: Auth
           cors: true
           method: delete
-          path: todos/{todoId}
-    iamRoleStatementsInherit: true       
+          path: todos/{todoId}  
     iamRoleStatements:
       - Effect: Allow
         Action:
