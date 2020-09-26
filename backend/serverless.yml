@@ -21,7 +21,7 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ap-south-1'}
@@ -32,6 +32,13 @@ provider:
     TODOS_S3_BUCKET: serverless-todos-rkndgt-attachments-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 1000
   
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - codedeploy:*
+      Resource:
+        - '*'  
+
   tracing:
     lambda: true
     apiGateway: true
@@ -74,7 +81,7 @@ functions:
       - http:
           method: get
           path: todos
-#          authorizer: Auth
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -98,15 +105,7 @@ functions:
     events:
       - http:
           authorizer: Auth
-          cors: 
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
+          cors: true
           method: post
           path: todos
           reqValidatorName: RequestBodyValidator
@@ -179,7 +178,7 @@ functions:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
-#         authorizer: Auth
+          authorizer: Auth
           cors: true
           method: post
           path: todos/{todoId}/attachment
@@ -197,16 +196,16 @@ functions:
 
 resources:
   Resources: # TODO: Add any necessary AWS resources --DONE
-    # GatewayResponseDefault4XX:
-    #   Type: AWS::ApiGateway::GatewayResponse
-    #   Properties:
-    #     ResponseParameters:
-    #       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
-    #       gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-    #       gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
-    #     ResponseType: DEFAULT_4XX
-    #     RestApiId:
-    #       Ref: ApiGatewayRestApi
+    GatewayResponseDefault4XX:
+      Type: AWS::ApiGateway::GatewayResponse
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+          gatewayresponse.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: ApiGatewayRestApi
 
     #1     
     RequestBodyValidator:
@@ -275,6 +274,8 @@ resources:
             - Sid: PublicReadForGetBucketObjects
               Effect: Allow
               Principal: '*'
-              Action: 's3:GetObject'
+              Action: 
+                - s3:GetObject
+                - s3:PutObject
               Resource: arn:aws:s3:::${self:provider.environment.TODOS_S3_BUCKET}/*
         Bucket: !Ref AttachmentsBucket
