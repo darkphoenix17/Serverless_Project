@@ -1,64 +1,82 @@
 import * as uuid from 'uuid'
 import { TodoItem } from '../models/TodoItem'
+import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { TodosAccess } from '../dataLayer/todoAccess'
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
-import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
-import { createLogger } from '../utils/logger';
+import { createLogger } from '../utils/logger'
+import { parseUserId } from '../auth/utils'
 
 // Using Winston Logger
-const logger = createLogger('Todos');
+const logger = createLogger('todos');
 
 const todoAccess = new TodosAccess()
 
-export async function getAllTodos(userId: string): Promise<TodoItem[]> {
-  return todoAccess.getAllTodos(userId)
+export const getAllTodos = async (jwtToken: string): Promise<TodoItem[]> => {
+  const userId = parseUserId(jwtToken)
+  return await todoAccess.getAllTodos(userId)
 }
 
-export async function createTodo(
+
+export const createTodo = async (
   createTodoRequest: CreateTodoRequest,
-  userId: string
-): Promise<TodoItem> {
+  jwtToken: string
+): Promise<TodoItem> => {
+  logger.info('In createTodo() function')
   const itemId = uuid.v4()
-
-  logger.info(`create Todo for ItemId ${itemId}`);
-
+  const userId = parseUserId(jwtToken)
+  //craete a todo using a variable createTodo 
   return await todoAccess.createTodo({
     todoId: itemId,
-    userId: userId,
+    userId,
     name: createTodoRequest.name,
     dueDate: createTodoRequest.dueDate,
-    createdAt: new Date().toISOString(),
     done: false,
+    createdAt: new Date().toISOString()
   })
 }
 
-export async function deleteTodo(
+export const deleteTodo = async (
   todoId: string,
-): Promise<void> {
-  const todo = await todoAccess.getTodo(todoId);
-
-  todoAccess.deleteTodo(todo.todoId);
+  jwtToken: string
+): Promise<string> => {
+  logger.info('In deleteTodo() function')
+  //logging into delete function
+  const userId = parseUserId(jwtToken)
+  logger.info('User Id: ' + userId)
+  return await todoAccess.deleteTodo(todoId, userId)
 }
 
-export async function updateTodo(
+export const updateTodo = async (
   todoId: string,
-  updateTodoRequest: UpdateTodoRequest
-): Promise<void> {
-  const todo = await todoAccess.getTodo(todoId);
-
-  todoAccess.updateTodo(todo.todoId, updateTodoRequest);
+  updateTodoRequest: UpdateTodoRequest,
+  jwtToken: string
+): Promise<TodoItem> => {
+  logger.info('In updateTodo() function')
+  //logging into updateTodo function
+  const userId = parseUserId(jwtToken)
+  logger.info('User Id: ' + userId)
+  return await todoAccess.updateTodo({
+    todoId,
+    userId,
+    name: updateTodoRequest.name,
+    dueDate: updateTodoRequest.dueDate,
+    done: updateTodoRequest.done,
+    createdAt: new Date().toISOString()
+  })
 }
 
-export async function generateUploadUrl(userId: string, todoId: string): Promise<String> {
-  return todoAccess.generateUploadUrl(userId, todoId)
+export const generateUploadUrl = async (todoId: string): Promise<string> => {
+  logger.info('In generateUploadUrl() function')
+  //logging into generate Url function
+  return await todoAccess.generateUploadUrl(todoId)
 }
 
 
-export async function setAttachmentUrl(
-  todoId: string,
-  attachmentUrl: string,
-): Promise<void> {
-  const todo = await todoAccess.getTodo(todoId);
+// export async function setAttachmentUrl(
+//   todoId: string,
+//   attachmentUrl: string,
+// ): Promise<void> {
+//   const todo = await todoAccess.getTodo(todoId);
 
-  todoAccess.setAttachmentUrl(todo.todoId, attachmentUrl);
-}
+//   todoAccess.setAttachmentUrl(todo.todoId, attachmentUrl);
+// }
