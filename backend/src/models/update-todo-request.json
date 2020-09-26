@@ -1,22 +1,21 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "todo",
-  "type": "object",
-  "properties": {
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "todo",
+    "type": "object",
+    "properties": {
       "name": {
-          "type": "string"
+        "type": "string"
       },
       "dueDate": {
-          "type": "string"
+        "type": "string"
       },
       "done": {
-          "type": "boolean"
+        "type": "boolean"
+      },
+      "attachmentUrl": {
+        "type": "string"
       }
-  },
-  "required": [
-      "name",
-      "dueDate",
-      "done"
-  ],
-  "additionalProperties": false
-}
+    },
+    "required": ["name", "dueDate", "done"],
+    "additionalProperties": false
+  }
