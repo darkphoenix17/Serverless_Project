@@ -147,7 +147,7 @@ To implement authentication in your application, you would have to create an Aut
 - Tracing of lambda function and API Gateway through Amazon XRay
 - CORS policy enabled
 - Using Json schema for validation
-- Authentication using third party service i.e. Auth0(https://manage.auth0.com/dashboard) here
+- Authentication using third party service i.e. [Auth0](https://manage.auth0.com/dashboard) here
 
 ## Logging
 
