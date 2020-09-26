@@ -13,21 +13,15 @@ export function parseUserId(jwtToken: string): string {
   return decodedJwt.sub
 }
 
-/**
- * Retrieve the token from the authorization header
- *
- * @param authHeader Authorization header
- *
- * @returns a token from the authorization header
- */
-export const getToken = (authHeader: string): string => {
-  if (!authHeader) throw new Error('No authentication header')
+export function getToken (authHeader: string): string {
+  if (!authHeader) throw new Error('No authentication header') //throw no authentication header error
 
-  if (!authHeader.toLowerCase().startsWith('bearer '))
+  if (!authHeader.toLowerCase().startsWith('bearer ')){
     throw new Error('Invalid authentication header')
-
-  const split = authHeader.split(' ')
-  const token = split[1]
+    //throw inavlid authentication header error
+  }
+  const part = authHeader.split(' ')
+  const token = part[1]
 
   return token
 }
