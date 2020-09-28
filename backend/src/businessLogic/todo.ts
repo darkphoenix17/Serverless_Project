@@ -21,18 +21,17 @@ export const createTodo = async (
   createTodoRequest: CreateTodoRequest,
   jwtToken: string
 ): Promise<TodoItem> => {
-  logger.info('In createTodo() function')
   const itemId = uuid.v4()
   const userId = parseUserId(jwtToken)
+  logger.info(`In createTodo() function for user ${userId}`)
   //craete a todo using a variable createTodo 
   return await todoAccess.createTodo({
     todoId: itemId,
     userId,
-    name: createTodoRequest.name,
-    dueDate: createTodoRequest.dueDate,
     done: false,
-    createdAt: new Date().toISOString()
-  })
+    createdAt: new Date().toISOString(),
+    ...createTodoRequest
+  }) as TodoItem
 }
 
 export const deleteTodo = async (
@@ -50,19 +49,12 @@ export const updateTodo = async (
   todoId: string,
   updateTodoRequest: UpdateTodoRequest,
   jwtToken: string
-): Promise<TodoItem> => {
+) => {
   logger.info('In updateTodo() function')
   //logging into updateTodo function
   const userId = parseUserId(jwtToken)
   logger.info('User Id: ' + userId)
-  return await todoAccess.updateTodo({
-    todoId,
-    userId,
-    name: updateTodoRequest.name,
-    dueDate: updateTodoRequest.dueDate,
-    done: updateTodoRequest.done,
-    createdAt: new Date().toISOString()
-  })
+  return await todoAccess.updateTodo(userId,todoId,updateTodoRequest)
 }
 
 export const generateUploadUrl = async (todoId: string): Promise<string> => {

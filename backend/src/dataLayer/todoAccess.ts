@@ -2,6 +2,7 @@ import * as AWS from 'aws-sdk'
 //import * as AWSXRay from 'aws-xray-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import { TodoItem } from "../models/TodoItem"
+import { TodoUpdate } from '../models/TodoUpdate'
 import { createLogger } from '../utils/logger'
 
 const logger = createLogger('todo-access')
@@ -84,34 +85,58 @@ export class TodosAccess {
       return userId
   }
 
-  async updateTodo(todo: TodoItem): Promise<TodoItem> {
-    logger.info(`Updating a todo with ID ${todo.todoId}`)
-    //lgooing Updating todo
-    const updateExpression = 'set #n = :name, dueDate = :dueDate, done = :done'
+  async updateTodo(userId: string, todoId: string, todoItem: TodoUpdate) {
+    logger.info(`Update todo with name ${todoItem.name} of user ${userId}`);
+      //logging into todoAccess
     await this.docClient.update({
-      TableName: this.todosTable,
-      Key: {
-        UserId: todo.userId,
-        todoId: todo.todoId
-      },
-
-      UpdateExpression: updateExpression,
-      ConditionExpression: 'todoId= :todoId',
-      ExpressionAttributeValues:
-      {
-        ':name': todo.name,
-        ':dueDate': todo.dueDate,
-        ':done': todo.done,
-        ':todoId': todo.todoId
-      },
-      ExpressionAttributeNames:
-      {
-        "#n": "name"
-      },
-      ReturnValues: 'UPDATED_NEW'
+        TableName: this.todosTable, 
+        // Update with key: 
+        Key: {
+            userId, 
+            todoId, 
+        }, 
+        UpdateExpression: 
+            'set #name = :name, #dueDate = :dueDate, #done = :done',
+        ExpressionAttributeValues: {
+            ':name': todoItem.name,
+            ':dueDate': todoItem.dueDate, 
+            ':done': todoItem.done
+        }, 
+        ExpressionAttributeNames: {
+            '#name': 'name', 
+            '#dueDate': 'dueDate', 
+            '#done': 'done'
+        }
     }).promise()
-    return todo
-  }
+}
+  // async updateTodo(todo: TodoItem): Promise<TodoItem> {
+  //   logger.info(`Updating a todo with ID ${todo.todoId}`)
+  //   //lgooing Updating todo
+  //   const updateExpression = 'set #n = :name, dueDate = :dueDate, done = :done'
+  //   await this.docClient.update({
+  //     TableName: this.todosTable,
+  //     Key: {
+  //       UserId: todo.userId,
+  //       todoId: todo.todoId
+  //     },
+
+  //     UpdateExpression: updateExpression,
+  //     ConditionExpression: 'todoId= :todoId',
+  //     ExpressionAttributeValues:
+  //     {
+  //       ':name': todo.name,
+  //       ':dueDate': todo.dueDate,
+  //       ':done': todo.done,
+  //       ':todoId': todo.todoId
+  //     },
+  //     ExpressionAttributeNames:
+  //     {
+  //       "#n": "name"
+  //     },
+  //     ReturnValues: 'UPDATED_NEW'
+  //   }).promise()
+  //   return todo
+  // }
 
   async generateUploadUrl(todoId: string): Promise<string> {
     logger.info('Generating upload Url')
