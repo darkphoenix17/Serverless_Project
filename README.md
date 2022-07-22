@@ -1,6 +1,6 @@
 # Serverless TODO
 
-To implement this project, you need to implement a simple TODO application using AWS Lambda and Serverless framework. Search for all comments starting with the `TODO:` in the code to find the placeholders that you need to implement.
+You need to implement a simple TODO application using AWS Lambda and Serverless framework. 
 
 # Functionality of the application
 
@@ -8,27 +8,25 @@ This application will allow creating/removing/updating/fetching TODO items. Each
 
 # TODO items
 
-The application should store TODO items, and each TODO item contains the following fields:
+The application stores TODO items, and each TODO item contains the following fields:
 
 * `todoId` (string) - a unique id for an item
+* `userId` (string) - a unique id for an user creating TODO item
 * `createdAt` (string) - date and time when an item was created
 * `name` (string) - name of a TODO item (e.g. "Change a light bulb")
 * `dueDate` (string) - date and time by which an item should be completed
 * `done` (boolean) - true if an item was completed, false otherwise
 * `attachmentUrl` (string) (optional) - a URL pointing to an image attached to a TODO item
 
-You might also store an id of a user who created a TODO item.
+# Functions implemented
 
+Following functions are implemented and configured in the `serverless.yml` file:
 
-# Functions to be implemented
+* `Auth` - this function implements a custom authorizer for API Gateway that is be added to all other functions.
 
-To implement this project, you need to implement the following functions and configure them in the `serverless.yml` file:
+* `GetTodos` - returns all TODOs for a current user. A user id is extracted from a JWT token that is sent by the frontend
 
-* `Auth` - this function should implement a custom authorizer for API Gateway that should be added to all other functions.
-
-* `GetTodos` - should return all TODOs for a current user. A user id can be extracted from a JWT token that is sent by the frontend
-
-It should return data that looks like this:
+It returns data that looks like this:
 
 ```json
 {
@@ -53,7 +51,7 @@ It should return data that looks like this:
 }
 ```
 
-* `CreateTodo` - should create a new TODO for a current user. A shape of data send by a client application to this function can be found in the `CreateTodoRequest.ts` file
+* `CreateTodo` - creates a new TODO for a current user. A shape of data send by a client application to this function can be found in the `CreateTodoRequest.ts` file
 
 It receives a new TODO item to be created in JSON format that looks like this:
 
@@ -67,7 +65,7 @@ It receives a new TODO item to be created in JSON format that looks like this:
 }
 ```
 
-It should return a new TODO item that looks like this:
+It returns a new TODO item that looks like this:
 
 ```json
 {
@@ -82,7 +80,7 @@ It should return a new TODO item that looks like this:
 }
 ```
 
-* `UpdateTodo` - should update a TODO item created by a current user. A shape of data send by a client application to this function can be found in the `UpdateTodoRequest.ts` file
+* `UpdateTodo` - Updates a TODO item created by a current user. A shape of data send by a client application to this function can be found in the `UpdateTodoRequest.ts` file
 
 It receives an object that contains three fields that can be updated in a TODO item:
 
@@ -112,18 +110,18 @@ It should return a JSON object that looks like this:
 }
 ```
 
-All functions are already connected to appropriate events from API Gateway.
+All functions are connected to appropriate events from API Gateway.
 
 An id of a user can be extracted from a JWT token passed by a client.
 
-You also need to add any necessary resources to the `resources` section of the `serverless.yml` file such as DynamoDB table and S3 bucket.
+Also added any necessary resources to the `resources` section of the `serverless.yml` file such as DynamoDB table and S3 bucket.
 
 
 # Frontend
 
 The `client` folder contains a web application that can use the API that should be developed in the project.
 
-This frontend should work with your serverless application once it is developed, you don't need to make any changes to the code. The only file that you need to edit is the `config.ts` file in the `client` folder. This file configures your client application just as it was done in the course and contains an API endpoint and Auth0 configuration:
+This frontend should work with your serverless application once it is developed. The file `config.ts` in the `client` folder configures your client application and contains an API endpoint and Auth0 configuration:
 
 ```ts
 const apiId = '...' API Gateway id
@@ -138,20 +136,11 @@ export const authConfig = {
 
 ## Authentication
 
-To implement authentication in your application, you would have to create an Auth0 application and copy "domain" and "client id" to the `config.ts` file in the `client` folder. We recommend using asymmetrically encrypted JWT tokens.
-
-# Best practices
-
-- Logging of API is enabled
-- Documentation is also enabled
-- Tracing of lambda function and API Gateway through Amazon XRay
-- CORS policy enabled
-- Using Json schema for validation
-- Authentication using third party service i.e. [Auth0](https://manage.auth0.com/dashboard) here
+To implement authentication in your application, create an Auth0 application and copy "domain" and "client id" to the `config.ts` file in the `client` folder. I recommend using asymmetrically encrypted JWT tokens.
 
 ## Logging
 
-The starter code comes with a configured [Winston](https://github.com/winstonjs/winston) logger that creates [JSON formatted](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/) log statements. You can use it to write log messages like this:
+The code is configured with [Winston](https://github.com/winstonjs/winston) logger that creates [JSON formatted](https://stackify.com/what-is-structured-logging-and-why-developers-need-it/) log statements. You use it to write log messages like this:
 
 ```ts
 import { createLogger } from '../../utils/logger'
@@ -164,17 +153,6 @@ logger.info('User was authorized', {
   key: 'value'
 })
 ```
-
-
-# Grading the submission
-
-Once you have finished developing your application, please set `apiId` and Auth0 parameters in the `config.ts` file in the `client` folder. A reviewer would start the React development server to run the frontend that should be configured to interact with your serverless application.
-
-**IMPORTANT**
-
-*Please leave your application running until a submission is reviewed. If implemented correctly it will cost almost nothing when your application is idle.*
-
-# Suggestions
 
 To store TODO items, you might want to use a DynamoDB table with local secondary index(es). A create a local secondary index you need to create a DynamoDB resource like this:
 
@@ -211,7 +189,8 @@ TodosTable:
 
 To query an index you need to use the `query()` method like:
 
-```ts
+```
+//file:todoAccess.ts
 await this.dynamoDBClient
   .query({
     TableName: 'table-name',
@@ -229,7 +208,7 @@ await this.dynamoDBClient
 ## Backend
 
 To deploy an application run the following commands:
-configure youe sls 
+configure your sls 
 ```
 sls config --provider aws --key <Iam Key> --secret <Iam Secret> --profile 'serverless'
 cd backend
@@ -237,6 +216,8 @@ npm install
 export NODE_OPTIONS=--max_old_space_size=8192
 sls deploy -v  --aws-profile serverless
 ```
+
+`Note`: I have made my default region as `ap-south-1` in serverless.yml
 
 ## Frontend
 
@@ -258,34 +239,15 @@ npm run start
 
 This should start a development server with the React application that will interact with the serverless TODO application.
 
-# Postman collection
-
-`Note`: I have made my default region as `ap-south-1` in serverless.yml
-An alternative way to test your API, you can use the Postman collection that contains sample requests. You can find a Postman collection in this project. To import this collection, do the following.
-
-Click on the import button:
-
-![Alt text](images/import-collection-1.png?raw=true "Image 1")
-
-
-Click on the "Choose Files":
-
-![Alt text](images/import-collection-2.png?raw=true "Image 2")
-
-
-Select a file to import:
-
-![Alt text](images/import-collection-3.png?raw=true "Image 3")
-
-
-Right click on the imported collection to set variables for the collection:
-
-![Alt text](images/import-collection-4.png?raw=true "Image 4")
-
-Provide variables for the collection (similarly to how this was done in the course):
-
-![Alt text](images/import-collection-5.png?raw=true "Image 5")
-
 ## Points to be noted:
 - LocalSecondaryIndexes (LSI) has been made for linking two datatypes
 - RS256algorith is used for Authorization
+
+# Best practices
+
+- Logging of API is enabled
+- Documentation is also enabled
+- Tracing of lambda function and API Gateway through Amazon XRay
+- CORS policy enabled
+- Using Json schema for validation
+- Authentication using third party service i.e. [Auth0](https://manage.auth0.com/dashboard) here
